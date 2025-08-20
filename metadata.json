@@ -1,0 +1,6 @@
+{
+  "name": "CSC-CUA System Chat",
+  "description": "A retro CUA-inspired chat interface powered by Gemini.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

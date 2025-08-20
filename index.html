@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CUA System Interface</title>
+    <link rel="stylesheet" href="index.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai",
+    "openai": "https://esm.sh/openai@4",
+    "openai/": "https://esm.sh/openai@4/",
+    "./db": "./db.js"
+  }
+}
+</script>
+    <script type="module" src="index.tsx"></script>
+  </head>
+  <body>
+    <div id="landing-page">
+      <header id="landing-header">
+        <div class="logo">CUA</div>
+        <nav>
+          <a href="#features">Features</a>
+          <a href="#personas">Personas</a>
+        </nav>
+      </header>
+
+      <main id="landing-main">
+        <section id="hero">
+          <div class="hero-content">
+            <h1>Next Generation AI Orchestration</h1>
+            <p>A retro-futuristic interface to a family of specialized AI agents. Experience seamless orchestration and powerful capabilities in a classic CUA-inspired environment.</p>
+            <button id="launch-app-button" class="neon-button">Launch C-OS</button>
+          </div>
+        </section>
+
+        <section id="features">
+          <h2>System Features</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <h3>Retro UI</h3>
+              <p>A classic windowed interface inspired by early graphical user interfaces, built for the modern web.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Multi-AI Backend</h3>
+              <p>Switch between Google Gemini and OpenAI models on the fly to leverage the best of both worlds.</p>
+            </div>
+             <div class="feature-card">
+              <h3>AI Agent Family</h3>
+              <p>Delegate tasks to a family of AI personas, each with a unique role and specialized expertise.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Orchestration Log</h3>
+              <p>A real-time log that shows the flow of tasks and communication between different AI agents.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Streaming Responses</h3>
+              <p>Get real-time, character-by-character responses for a dynamic, terminal-like feel.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Persistent History</h3>
+              <p>Your conversation with each persona is saved locally in your browser for seamless sessions.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="personas">
+            <h2>Meet the AI Family</h2>
+            <div class="personas-grid">
+                <!-- Personas will be populated by script -->
+            </div>
+        </section>
+      </main>
+
+      <footer id="landing-footer">
+        <p>&copy; 2024 CUA Systems. All rights reserved. This interface is a creative demonstration and does not interact with your actual computer's file system or operating system.</p>
+      </footer>
+    </div>
+    
+    <!-- APP ELEMENTS - INITIALLY HIDDEN -->
+    <div id="boot-sequence">
+      <div id="boot-text"></div>
+    </div>
+
+    <div class="desktop-icon" id="icon-launch" role="button" tabindex="0" aria-label="Launch C-OS">
+        <div class="icon-visual" aria-hidden="true"></div>
+        <span>Launch C-OS</span>
+    </div>
+    <div class="desktop-icon" id="icon-diagnostics" role="button" tabindex="0" aria-label="Run Diagnostics">
+        <div class="icon-visual" aria-hidden="true"></div>
+        <span>Diagnostics</span>
+    </div>
+
+    <div id="cua-window" role="application" aria-label="CUA System Interface">
+      <div id="title-bar">
+        <span>CUA System Interface :: Operator Control Center</span>
+        <div id="window-controls">
+          <button id="toggle-maximize-button" type="button" aria-label="Maximize Window">&#x25A1;</button>
+        </div>
+      </div>
+
+      <div id="main-content">
+        <div id="chat-panel">
+          <div id="chat-container" role="log" aria-live="polite">
+            <!-- Chat messages will be populated by script -->
+          </div>
+        </div>
+        <div id="resizer" role="separator" aria-orientation="vertical"></div>
+        <div id="orchestration-panel">
+            <div class="panel-header">Orchestration Log</div>
+            <div id="orchestration-log-content" role="log" aria-live="polite">
+                <!-- Orchestration events will be populated by script -->
+            </div>
+        </div>
+      </div>
+
+      <div id="input-area">
+        <div id="controls-container">
+          <div class="control-group">
+              <label for="persona-selector">Persona:</label>
+              <select id="persona-selector" aria-label="Select Persona">
+                <!-- Populated by script -->
+              </select>
+          </div>
+          <div class="control-group">
+            <label for="model-selector">Provider:</label>
+            <select id="model-selector" aria-label="Select AI Provider">
+              <option value="gemini">Gemini</option>
+              <option value="openai">OpenAI</option>
+            </select>
+          </div>
+          <button id="clear-history-button" type="button" aria-label="Clear Chat History">Clear History</button>
+        </div>
+        <div id="staged-file-container"></div>
+        <form id="chat-form" role="form">
+          <button id="upload-button" type="button" aria-label="Upload File">&#x1F4CE;</button>
+          <label for="chat-input" class="visually-hidden">User Input</label>
+          <input
+            id="chat-input"
+            type="text"
+            placeholder="Enter command..."
+            autocomplete="off"
+            aria-label="Enter command or message"
+          />
+          <input type="file" id="file-input" accept="image/*" style="display: none;" />
+          <button type="submit" aria-label="Send Message">Send</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
