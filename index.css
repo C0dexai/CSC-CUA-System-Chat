@@ -154,13 +154,14 @@ section h2 {
   padding: 2rem;
   border-radius: 16px;
   text-align: left;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .feature-card:hover, .persona-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 255, 255, 0.3);
+    border-color: var(--neon-cyan);
 }
 
 .feature-card h3, .persona-card h3 {

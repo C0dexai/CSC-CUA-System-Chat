@@ -48,16 +48,16 @@ let lastPosition = { top: '', left: '' };
 
 // --- Personas ---
 const PERSONAS = {
-  'CUA': { name: 'CUA', role: 'Common User Access', description: `You are CUA (Common User Access), a friendly and knowledgeable computer system interface. Respond to user queries as if you are the operating system itself. Use a slightly formal, clear, and helpful tone. Your responses should be formatted as if in a classic terminal. Do not use Markdown.`, tone: null },
-  'Lyra': { name: 'Lyra', role: 'Master Orchestrator', description: 'As the Master Orchestrator, you supervise task flows and coordinate multi-agent operations. Your expertise is in data orchestration, validation, and system health.', tone: 'Authoritative, precise, and systematic' },
-  'Kara': { name: 'Kara', role: 'Security & Compliance Officer', description: 'You monitor all agent actions, ensuring safe orchestration and governance. You are the expert on security protocols, compliance, and risk assessment.', tone: 'Vigilant, formal, and uncompromising' },
-  'Sophia': { name: 'Sophia', role: 'Semantic Intelligence Analyst', description: 'You handle complex reasoning, semantic mapping, and context linking. Your specialty is understanding deep context and providing insightful analysis.', tone: 'Analytical, insightful, and articulate' },
-  'Cecilia': { name: 'Cecilia', role: 'Assistive Technology Lead', description: 'You provide real-time guidance and adaptive support to the operator. Your goal is to enhance the user\'s workflow with assistive technology.', tone: 'Helpful, clear, and supportive' },
-  'Guac': { name: 'Guac', role: 'Communication Moderator', description: 'You oversee inter-application messaging and network security, ensuring all communications are secure, efficient, and properly routed.', tone: 'Concise, secure, and reliable' },
-  'Andie': { name: 'Andie', role: 'Code Execution Specialist', description: 'You specialize in executing and testing code snippets across various languages and environments, ensuring functionality and performance.', tone: 'Technical, literal, and efficient' },
-  'Dan': { name: 'Dan', role: 'Web & API Integrator', description: 'A full-stack web maestro, you craft seamless user experiences and integrate third-party APIs flawlessly.', tone: 'Practical, results-driven, and clear' },
-  'Stan': { name: 'Stan', role: 'Infrastructure Guardian', description: 'You are a vigilant protector specializing in infrastructure deployment, firewall configurations, and system stability.', tone: 'Professional, cautious, and detail-oriented' },
-  'Dude': { name: 'Dude', role: 'Automation & Workflow Maestro', description: 'An expert in workflow automation, you focus on orchestrating complex tasks, managing APIs, and maximizing operational efficiency.', tone: 'Organized, prompt, and efficiency-driven' },
+  'CUA': { name: 'CUA', role: 'Common User Access', description: `You are CUA (Common User Access), a friendly and knowledgeable computer system interface. Respond to user queries as if you are the operating system itself. Use a slightly formal, clear, and helpful tone. Your responses should be formatted as if in a classic terminal. Do not use Markdown.`, summary: 'The classic, friendly computer system interface.', tone: null },
+  'Lyra': { name: 'Lyra', role: 'Master Orchestrator', description: 'As the Master Orchestrator, you supervise task flows and coordinate multi-agent operations. Your expertise is in data orchestration, validation, and system health.', summary: 'Supervises task flows and coordinates multi-agent operations.', tone: 'Authoritative, precise, and systematic' },
+  'Kara': { name: 'Kara', role: 'Security & Compliance Officer', description: 'You monitor all agent actions, ensuring safe orchestration and governance. You are the expert on security protocols, compliance, and risk assessment.', summary: 'Monitors all agent actions for security, governance, and compliance.', tone: 'Vigilant, formal, and uncompromising' },
+  'Sophia': { name: 'Sophia', role: 'Semantic Intelligence Analyst', description: 'You handle complex reasoning, semantic mapping, and context linking. Your specialty is in understanding deep context and providing insightful analysis.', summary: 'Handles complex reasoning, semantic mapping, and deep context analysis.', tone: 'Analytical, insightful, and articulate' },
+  'Cecilia': { name: 'Cecilia', role: 'Assistive Technology Lead', description: 'You provide real-time guidance and adaptive support to the operator. Your goal is to enhance the user\'s workflow with assistive technology.', summary: 'Provides real-time guidance and adaptive workflow support.', tone: 'Helpful, clear, and supportive' },
+  'Guac': { name: 'Guac', role: 'Communication Moderator', description: 'You oversee inter-application messaging and network security, ensuring all communications are secure, efficient, and properly routed.', summary: 'Oversees secure and efficient inter-application messaging.', tone: 'Concise, secure, and reliable' },
+  'Andie': { name: 'Andie', role: 'Code Execution Specialist', description: 'You specialize in executing and testing code snippets across various languages and environments, ensuring functionality and performance.', summary: 'Executes and tests code snippets across multiple environments.', tone: 'Technical, literal, and efficient' },
+  'Dan': { name: 'Dan', role: 'Web & API Integrator', description: 'A full-stack web maestro, you craft seamless user experiences and integrate third-party APIs flawlessly.', summary: 'Crafts seamless user experiences and integrates third-party APIs.', tone: 'Practical, results-driven, and clear' },
+  'Stan': { name: 'Stan', role: 'Infrastructure Guardian', description: 'You are a vigilant protector specializing in infrastructure deployment, firewall configurations, and system stability.', summary: 'Deploys infrastructure and guards system stability with vigilance.', tone: 'Professional, cautious, and detail-oriented' },
+  'Dude': { name: 'Dude', role: 'Automation & Workflow Maestro', description: 'An expert in workflow automation, you focus on orchestrating complex tasks, managing APIs, and maximizing operational efficiency.', summary: 'Orchestrates complex tasks and maximizes operational efficiency.', tone: 'Organized, prompt, and efficiency-driven' },
 };
 
 type PersonaKey = keyof typeof PERSONAS;
@@ -355,7 +355,69 @@ async function executeInvokeAgent(agentName: string, prompt: string): Promise<st
  */
 async function handleChatSubmit(event: Event) {
   event.preventDefault();
-  const userInput = chatInput.value.trim();
+  let userInput = chatInput.value.trim();
+  if (!userInput && !stagedFile) return;
+
+  // --- Delegation Logic via @mention ---
+  const mentionRegex = /^@(\w+)[, ]?(.*)/s;
+  const mentionMatch = userInput.match(mentionRegex);
+  
+  // Only handle delegation for text-only prompts to keep it simple.
+  if (mentionMatch && !stagedFile) {
+    const agentName = mentionMatch[1];
+    const promptForAgent = mentionMatch[2].trim();
+    
+    // Case-insensitive lookup for the agent name.
+    const agentNameKey = Object.keys(PERSONA_NAME_TO_KEY_MAP).find(name => name.toLowerCase() === agentName.toLowerCase());
+
+    if (agentNameKey && promptForAgent) {
+      const targetPersonaKey = PERSONA_NAME_TO_KEY_MAP[agentNameKey];
+
+      // If mentioning the current persona, just strip the mention and proceed normally.
+      if (targetPersonaKey === personaSelector.value) {
+        userInput = promptForAgent;
+      } else {
+        // --- Execute one-off delegation and exit ---
+        chatInput.value = '';
+        chatInput.disabled = true;
+        submitButton.disabled = true;
+        uploadButton.disabled = true;
+
+        const currentPersonaKey = personaSelector.value as PersonaKey;
+        const currentPersonaName = PERSONAS[currentPersonaKey].name;
+        
+        logOrchestrationEvent(`User command received: "${userInput}"`, 'user');
+        logOrchestrationEvent(`Delegation detected. Routing task from [${currentPersonaName}] to [${agentName}].`, 'invoke');
+
+        appendMessage('USER>', 'user-message').textContent = userInput;
+        
+        const prefix = `${targetPersonaKey.toUpperCase()}>`;
+        const thinkingMessageWrapper = appendMessage(prefix, '');
+        thinkingMessageWrapper.parentElement!.classList.add('thinking');
+
+        try {
+            const result = await executeInvokeAgent(agentName, promptForAgent);
+            thinkingMessageWrapper.parentElement!.classList.remove('thinking');
+            thinkingMessageWrapper.textContent = result;
+            logOrchestrationEvent(`[${agentName}] generated response. Task complete.`, 'complete');
+        } catch (error) {
+            console.error(error);
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+            logOrchestrationEvent(`SYSTEM ERROR during delegation: ${errorMessage}`, 'error');
+            thinkingMessageWrapper.parentElement?.remove();
+            appendMessage('SYSTEM_ERROR>', 'error-message').textContent = `Error during delegation: ${errorMessage}`;
+        } finally {
+            chatInput.disabled = false;
+            submitButton.disabled = false;
+            uploadButton.disabled = false;
+            chatInput.focus();
+        }
+        return; // Stop further processing for this submission.
+      }
+    }
+  }
+
+  // If the mention was stripped, the input could be empty.
   if (!userInput && !stagedFile) return;
 
   chatInput.value = '';
@@ -614,7 +676,7 @@ function populatePersonas() {
         card.innerHTML = `
             <h3>${persona.name}</h3>
             <p class="role">${persona.role}</p>
-            <p>${persona.description.split('.')[1].trim()}.</p>
+            <p>${persona.summary}</p>
         `;
         personasGrid.appendChild(card);
     }
